@@ -1,0 +1,5 @@
+{
+  "name": "Region Reveal: Name the Nation",
+  "description": "A geography game where you guess the country based on three of its states/regions, powered by Gemini AI.",
+  "requestFramePermissions": []
+}
