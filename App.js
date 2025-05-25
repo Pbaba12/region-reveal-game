@@ -1,4 +1,6 @@
+// --- START OF FILE App.js (NEW VERSION) ---
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom/client'; // Import ReactDOM here
 import Header from './components/Header.js';
 import GuessInput from './components/GuessInput.js';
 import FeedbackDisplay from './components/FeedbackDisplay.js';
@@ -9,10 +11,9 @@ import {
   getWinMessage,
   isApiKeyAvailable as checkApiKey
 } from './services/geminiService.js';
-// import type { GameState } from './types.js'; // GameState type usage removed
 
-const App = () => { // Removed React.FC
-  const [gameState, setGameState] = useState({ // Removed <GameState>
+const AppContent = () => { // Renamed original App to AppContent
+  const [gameState, setGameState] = useState({
     regions: [],
     secretCountry: '',
     aiQuestion: 'Loading regions and mystery nation...',
@@ -64,61 +65,26 @@ const App = () => { // Removed React.FC
     initializeGame();
   }, [initializeGame]);
 
-  const handleGuessChange = (value) => { // Removed type annotation
+  const handleGuessChange = (value) => {
     setGameState(prev => ({ ...prev, currentGuess: value }));
   };
 
   const handleSubmitGuess = useCallback(async () => {
     if (gameState.currentGuess.trim() === '') {
-      setGameState(prev => ({
-        ...prev,
-        feedbackMessage: "Please enter your guess for the country.",
-        statusMessage: "Empty guess",
-      }));
+      setGameState(prev => ({ ...prev, feedbackMessage: "Please enter your guess for the country.", statusMessage: "Empty guess" }));
       return;
     }
-
-    setGameState(prev => ({
-      ...prev,
-      isLoadingAI: true,
-      guessCount: prev.guessCount + 1,
-      statusMessage: '',
-      feedbackMessage: '',
-      isCorrectGuess: false,
-    }));
-
-    const evaluation = await evaluateCountryGuess(
-      gameState.regions,
-      gameState.secretCountry,
-      gameState.currentGuess
-    );
-
+    setGameState(prev => ({ ...prev, isLoadingAI: true, guessCount: prev.guessCount + 1, statusMessage: '', feedbackMessage: '', isCorrectGuess: false }));
+    const evaluation = await evaluateCountryGuess(gameState.regions, gameState.secretCountry, gameState.currentGuess);
     if (evaluation.isCorrect) {
-      const congratsMessage = await getWinMessage(gameState.guessCount + 1, gameState.secretCountry); // gameState.guessCount was already incremented
-      setGameState(prev => ({
-        ...prev,
-        feedbackMessage: congratsMessage,
-        statusMessage: "Correct!",
-        gameOver: true,
-        isLoadingAI: false,
-        isCorrectGuess: true,
-      }));
+      const congratsMessage = await getWinMessage(gameState.guessCount, gameState.secretCountry); // guessCount already incremented
+      setGameState(prev => ({ ...prev, feedbackMessage: congratsMessage, statusMessage: "Correct!", gameOver: true, isLoadingAI: false, isCorrectGuess: true }));
     } else {
       let status = "Incorrect";
-      if (evaluation.isClose) {
-        status = "Close!";
-      }
-      setGameState(prev => ({
-        ...prev,
-        feedbackMessage: evaluation.feedback,
-        statusMessage: status,
-        currentGuess: '',
-        isLoadingAI: false,
-        isCorrectGuess: false,
-      }));
+      if (evaluation.isClose) status = "Close!";
+      setGameState(prev => ({ ...prev, feedbackMessage: evaluation.feedback, statusMessage: status, currentGuess: '', isLoadingAI: false, isCorrectGuess: false }));
     }
   }, [gameState.regions, gameState.secretCountry, gameState.currentGuess, gameState.guessCount]);
-
 
   const handleRestartGame = () => {
     initializeGame(true);
@@ -128,31 +94,15 @@ const App = () => { // Removed React.FC
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 selection:bg-cyan-500 selection:text-cyan-900">
       <div className="w-full max-w-xl mx-auto">
         <Header />
-        
         {showApiKeyWarning && !apiKeyAvailable && (
           <div className="my-4 p-3 bg-yellow-500/20 border border-yellow-600 text-yellow-300 rounded-md text-sm text-center">
             <strong>Warning:</strong> Gemini API key not found. AI-powered features are disabled. The game will use basic fallback data.
           </div>
         )}
-
         <main className="mt-4 bg-slate-800/50 p-6 sm:p-8 rounded-xl shadow-2xl backdrop-blur-md border border-slate-700">
-          <FeedbackDisplay
-            regions={gameState.regions}
-            aiQuestion={gameState.aiQuestion}
-            aiFeedbackMessage={gameState.feedbackMessage}
-            statusMessage={gameState.statusMessage}
-            guessCount={gameState.guessCount}
-            isLoadingAI={gameState.isLoadingAI}
-            gameOver={gameState.gameOver}
-            isCorrectGuess={gameState.isCorrectGuess}
-          />
+          <FeedbackDisplay regions={gameState.regions} aiQuestion={gameState.aiQuestion} aiFeedbackMessage={gameState.feedbackMessage} statusMessage={gameState.statusMessage} guessCount={gameState.guessCount} isLoadingAI={gameState.isLoadingAI} gameOver={gameState.gameOver} isCorrectGuess={gameState.isCorrectGuess} />
           {!gameState.gameOver && (
-            <GuessInput
-              currentGuess={gameState.currentGuess}
-              onGuessChange={handleGuessChange}
-              onSubmitGuess={handleSubmitGuess}
-              isDisabled={gameState.isLoadingAI || gameState.gameOver}
-            />
+            <GuessInput currentGuess={gameState.currentGuess} onGuessChange={handleGuessChange} onSubmitGuess={handleSubmitGuess} isDisabled={gameState.isLoadingAI || gameState.gameOver} />
           )}
           <div className="mt-6 flex justify-center">
              <RestartButton onRestart={handleRestartGame} isVisible={gameState.gameOver || (gameState.guessCount > 0 && !gameState.isLoadingAI)} />
@@ -166,4 +116,15 @@ const App = () => { // Removed React.FC
   );
 };
 
-export default App;
+// New function to handle rendering
+const renderApp = (rootElement) => {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <AppContent />
+    </React.StrictMode>
+  );
+};
+
+// Export the renderApp function and the component (though AppContent isn't directly used by index.js anymore)
+export default { renderApp, AppContent }; // Exporting an object
