@@ -11,7 +11,7 @@ const AppContent = () => {
     <div>
       <h1>Minimal App Test</h1>
       <p>If you see this, the basic React import is working.</p>
-    </div>
+    </div
   );
 };
 
