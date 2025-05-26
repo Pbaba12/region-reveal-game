@@ -8,7 +8,7 @@ console.log("Simplified App.js loaded, React imported:", React); // Line 4
 
 const AppContent = () => {
   return (
-    </div>
+    <div>
       <h1>Minimal App Test</h1>
       <p>If you see this, the basic React import is working.</p>
     </div>
